@@ -1,11 +1,7 @@
-import bcrypt from 'bcrypt';
 import { Request, Response } from 'express';
-import { mailerOptions, tranporter } from '../config/mail.config';
+import jwt from 'jsonwebtoken';
 import User from '../db/models/user.model';
 import Helper from '../helper/Helper';
-import Role from '../db/models/role.model';
-import jwt from 'jsonwebtoken';
-import { HttpStatusCode } from '../constants';
 import { AuthService } from '../services';
 const dotenv = require('dotenv');
 dotenv.config();

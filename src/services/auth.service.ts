@@ -1,10 +1,10 @@
 import bcrypt from 'bcrypt';
-import { Request, Response } from 'express';
+import { Request } from 'express';
+import { mailerOptions, tranporter } from '../config/mail.config';
+import Role from '../db/models/role.model';
 import User from '../db/models/user.model';
 import Helper from '../helper/Helper';
-import { mailerOptions, tranporter } from '../config/mail.config';
 import { IUser } from './../types/common';
-import Role from '../db/models/role.model';
 
 export const AuthService = {
     registerUser: async (userData: IUser, req: Request) => {
