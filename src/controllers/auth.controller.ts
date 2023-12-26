@@ -29,8 +29,13 @@ const AuthController = {
                 secure: false,
             });
             return res.status(200).send(Helper.ResponseData(200, 'Login Successfully', loginResult));
-        } catch (error) {
-            return res.status(500).send(Helper.ResponseError(500, '', error));
+        } catch (error: any) {
+            console.log('error', error);
+            if (error?.statusCode === 404) {
+                return res.status(404).send(Helper.ResponseError(404, error?.message, error));
+            } else {
+                return res.status(500).send(Helper.ResponseError(500, '', error));
+            }
         }
     },
 
@@ -80,23 +85,7 @@ const AuthController = {
     Verify: async (req: Request, res: Response): Promise<Response> => {
         try {
             const { token } = req.params;
-            const secretKey: string = process.env.JWT_TOKEN as string;
-            let response: any;
-            await jwt.verify(token as string, secretKey, (err, decoded) => {
-                if (err) {
-                    response = null;
-                } else {
-                    response = decoded;
-                }
-            });
-            const user = await User.findOne({
-                where: {
-                    email: String(response?.email),
-                },
-            });
-            if (!user) {
-                return res.status(404).send(Helper.ResponseError(404, 'Email not Exist', ''));
-            }
+            const user = await AuthService.verifyEmailUser(token);
             if (user.isVerify !== true) {
                 user.isVerify = true;
                 await user.save();

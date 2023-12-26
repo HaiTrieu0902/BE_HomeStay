@@ -5,6 +5,7 @@ import Role from '../db/models/role.model';
 import User from '../db/models/user.model';
 import Helper from '../helper/Helper';
 import { IUser } from './../types/common';
+import jwt from 'jsonwebtoken';
 
 export const AuthService = {
     registerUser: async (userData: IUser, req: Request) => {
@@ -50,7 +51,10 @@ export const AuthService = {
                 attributes: { exclude: ['roleId'] },
             });
             if (!user) {
-                throw new Error('Email not found');
+                const error = new Error();
+                (error as any).statusCode = 404;
+                (error as any).message = 'Email not found';
+                throw error;
             }
             const isPasswordMatch = await bcrypt.compare(password, user.password);
             if (!isPasswordMatch) {
@@ -68,7 +72,7 @@ export const AuthService = {
 
             return { ...userDataWithoutPassword, token: token };
         } catch (error: any) {
-            throw new Error('Error logging in: ' + error?.message);
+            throw error;
         }
     },
 
@@ -134,22 +138,30 @@ export const AuthService = {
         }
     },
 
-    // async verifyEmail(email) {
-    //     try {
-    //         const user = await User.findOne({ where: { email } });
-    //         if (!user) {
-    //             throw new Error('Email not found');
-    //         }
-    //         if (user.isVerify) {
-    //             throw new Error('Email Already Verified');
-    //         }
-    //         user.isVerify = true;
-    //         await user.save();
-    //         return 'Email Verified Successfully';
-    //     } catch (error) {
-    //         throw new Error('Error verifying email: ' + error.message);
-    //     }
-    // },
+    verifyEmailUser: async (token: string) => {
+        try {
+            const secretKey: string = process.env.JWT_TOKEN as string;
+            let response: any;
+            await jwt.verify(token as string, secretKey, (err, decoded) => {
+                if (err) {
+                    response = null;
+                } else {
+                    response = decoded;
+                }
+            });
+            const user = await User.findOne({
+                where: {
+                    email: String(response?.email),
+                },
+            });
+            if (!user) {
+                throw new Error('Email not Exist');
+            }
+            return user;
+        } catch (error) {
+            throw error;
+        }
+    },
 };
 
 export default AuthService;
