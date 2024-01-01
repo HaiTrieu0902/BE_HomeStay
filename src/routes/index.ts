@@ -1,5 +1,6 @@
 import routeAuth from './auth.role';
 import routeCategory from './category.route';
+import commonRoom from './common.route';
 import routeRole from './role.route';
 import routeRoom from './room.route';
 import routeUser from './user.route';
@@ -10,5 +11,6 @@ function route(app: any) {
     app.use('/api/auth', routeAuth);
     app.use('/api/category', routeCategory);
     app.use('/api/room', routeRoom);
+    app.use('/api/common', commonRoom);
 }
 export default route;
